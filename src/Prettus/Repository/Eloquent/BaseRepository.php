@@ -574,7 +574,7 @@ abstract class BaseRepository implements RepositoryInterface, RepositoryCriteria
         $temporarySkipPresenter = $this->skipPresenter;
         $this->skipPresenter(true);
 
-        $model = $this->find($id);
+        $model = $this->model->findOrFail($id);
         $originalModel = clone $model;
 
         $this->skipPresenter($temporarySkipPresenter);
