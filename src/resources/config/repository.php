@@ -169,6 +169,11 @@ return [
         */
         'acceptedConditions' => [
             '=',
+            '!=',
+            '<',
+            '>',
+            '<=',
+            '>=',
             'like'
         ],
         /*
@@ -222,15 +227,19 @@ return [
         'basePath'      => app()->path(),
         'rootNamespace' => 'App\\',
         'paths'         => [
-            'models'       => 'Entities',
-            'repositories' => 'Repositories',
-            'interfaces'   => 'Repositories',
-            'transformers' => 'Transformers',
-            'presenters'   => 'Presenters',
-            'validators'   => 'Validators',
-            'controllers'  => 'Http/Controllers',
-            'provider'     => 'RepositoryServiceProvider',
-            'criteria'     => 'Criteria',
+            'models'            => 'Entities',
+            'repositories'      => 'Repositories',
+            'interfaces'        => 'Contracts/Repositories',
+            'transformers'      => 'Transformers',
+            'presenters'        => 'Presenters',
+            'validators'        => 'Validators',
+            'controllers'       => 'Http/Controllers',
+            'api-controllers'   => 'Http/Controllers/Api',
+            'api-base'          => 'Http/Controllers/Api',
+            'services'          => 'Services',
+            'provider'          => 'RepositoryServiceProvider',
+            'criteria'          => 'Criteria',
+            'tests'             => 'Entities',
             'stubsOverridePath' => app()->path()
         ]
     ]

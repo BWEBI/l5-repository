@@ -164,5 +164,6 @@ class MigrationGenerator extends Generator
         }
 
         return Stub::create($path . "/Stubs/migration/{$file}.stub", $replacements);
+
     }
 }

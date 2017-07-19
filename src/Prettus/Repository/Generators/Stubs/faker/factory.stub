@@ -1,0 +1,11 @@
+<?php
+
+/** @var \Illuminate\Database\Eloquent\Factory $factory */
+$factory->define($APPNAME$$MODEL$\$ENTITY$::class, function (Faker\Generator $faker) {
+    return [
+        /* place your model properties you want to use here */
+
+        'created_at'    => $faker->dateTime,
+        'updated_at'    => $faker->dateTime,
+    ];
+});

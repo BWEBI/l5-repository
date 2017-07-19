@@ -60,7 +60,17 @@ class EntityCommand extends Command
         if ($this->confirm('Would you like to create a Controller? [y|N]')) {
 
             // Generate a controller resource
+            $controller_type = $this->choice('What type of controller you want?', ['Service Controller', 'Repository Controller'], 0);
+
             $this->call('make:resource', [
+                'name'    => $this->argument('name'),
+                '--force' => $this->option('force'),
+                'type'    => $controller_type
+            ]);
+        }
+
+        if ($this->confirm('Would you like to create an API Controller? [y|N]')) {
+            $this->call('make:api', [
                 'name'    => $this->argument('name'),
                 '--force' => $this->option('force')
             ]);

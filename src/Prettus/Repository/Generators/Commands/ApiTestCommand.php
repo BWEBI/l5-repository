@@ -2,13 +2,13 @@
 namespace Prettus\Repository\Generators\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Collection;
-use Prettus\Repository\Generators\ControllerGenerator;
+use Prettus\Repository\Exceptions\ClassExistsException;
 use Prettus\Repository\Generators\FileAlreadyExistsException;
+use Prettus\Repository\Generators\TestGenerator;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
-class ControllerCommand extends Command
+class ApiTestCommand extends Command
 {
 
     /**
@@ -16,46 +16,45 @@ class ControllerCommand extends Command
      *
      * @var string
      */
-    protected $name = 'make:resource';
+    protected $name = 'make:api-test';
 
     /**
      * The description of command.
      *
      * @var string
      */
-    protected $description = 'Create a new RESTfull controller.';
+    protected $description = 'Create a new test API class.';
 
     /**
      * The type of class being generated.
      *
      * @var string
      */
-    protected $type = 'Controller';
+    protected $type = 'Test';
 
 
     /**
      * Execute the command.
+     *
+     * @throws FileAlreadyExistsException
+     * @throws ClassExistsException
      *
      * @return void
      */
     public function fire()
     {
         try {
-            // Generate create request for controller
-            $this->call('make:request', [
-                'name' => $this->argument('name') . 'CreateRequest'
-            ]);
-            // Generate update request for controller
-            $this->call('make:request', [
-                'name' => $this->argument('name') . 'UpdateRequest'
-            ]);
-
-            (new ControllerGenerator([
-                'name' => $this->argument('name'),
-                'force' => $this->option('force'),
-                'type' => $this->argument('type'),
+            (new TestGenerator([
+                'name'          => $this->argument('name'),
+                'force'         => $this->option('force'),
+                '--fillable'    => $this->option('fillable'),
             ]))->run();
             $this->info($this->type . ' created successfully.');
+
+            $this->call('make:faker', [
+                'name'    => $this->argument('name'),
+                '--force' => $this->option('force')
+            ]);
         } catch (FileAlreadyExistsException $e) {
             $this->error($this->type . ' already exists!');
 
@@ -78,12 +77,6 @@ class ControllerCommand extends Command
                 'The name of model for which the controller is being generated.',
                 null
             ],
-            [
-                'type',
-                InputArgument::OPTIONAL,
-                'The type of the controller to be generated.',
-                null
-            ],
         ];
     }
 
@@ -101,6 +94,13 @@ class ControllerCommand extends Command
                 'f',
                 InputOption::VALUE_NONE,
                 'Force the creation if file already exists.',
+                null
+            ],
+            [
+                'fillable',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'The fillable attributes.',
                 null
             ],
         ];

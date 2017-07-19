@@ -1,0 +1,162 @@
+<?php
+
+$NAMESPACE$
+
+use Exception;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\App;
+use Illuminate\Database\QueryException;
+use Prettus\Validator\Exceptions\ValidatorException;
+use Dingo\Api\Exception\StoreResourceFailedException;
+use Prettus\Repository\Contracts\ResourceableInterface;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+$SERVICE$
+
+
+class $API$ApiController extends ApiBaseController implements ResourceableInterface
+{
+
+    /**
+     * @var $CLASS$Service
+     */
+    protected $service;
+
+    public function __construct($CLASS$Service $service)
+    {
+        $this->service = $service;
+        App::setLocale('en');
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @throws HttpException for errors and exceptions
+     *
+     * @return Response
+     */
+    public function index()
+    {
+        try {
+
+            return $this->response->collection($this->service->repository->all(), $this->service->presenter->getTransformer());
+
+        } catch (QueryException $e) {
+            throw new HttpException($e->getMessage());
+        } catch (Exception $e) {
+            throw new HttpException($e->getMessage());
+        }
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  Requst $request
+     *
+     * @throws StoreResourceFailedException if the validation failed
+     * @throws HttpException for other errors and exceptions
+     *
+     * @return Response
+     */
+    public function store(Request $request)
+    {
+        try {
+
+            $item = $this->service->repository->create($request->all());
+
+            return $this->response->item($item, $this->service->presenter->getTransformer())->setStatusCode(201);
+
+        } catch (ValidatorException $e) {
+            throw new StoreResourceFailedException('Could not create, validation failed', $e->getMessageBag());
+        } catch (QueryException $e) {
+            throw new HttpException($e->getMessage());
+        } catch (Exception $e) {
+            throw new HttpException($e->getMessage());
+        }
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int $id
+     *
+     * @throws HttpException for errors and exceptions
+     *
+     * @return Response
+     */
+    public function show($id)
+    {
+        try {
+
+            return $this->service->repository->find($id);
+
+        } catch (QueryException $e) {
+            throw new HttpException($e->getMessage());
+        } catch (Exception $e) {
+            throw new HttpException($e->getMessage());
+        }
+    }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  Request $request
+     * @param  string $id
+     *
+     * @throws StoreResourceFailedException if the validation failed
+     * @throws NotFoundHttpException if the resource is not found
+     * @throws HttpException for other errors and exceptions
+     *
+     * @return Response
+     */
+    public function update(Request $request, $id)
+    {
+        try {
+
+            $item = $this->service->repository->update($request->all(), $id);
+
+            return $this->response->item($item, $this->service->presenter->getTransformer());
+
+        } catch (ValidatorException $e) {
+            throw new StoreResourceFailedException('Could not update, validation failed', $e->getMessageBag());
+        } catch (ModelNotFoundException $e) {
+            throw new NotFoundHttpException('Resource with id '. $id .' does not exist');
+        } catch (QueryException $e) {
+            throw new HttpException($e->getMessage());
+        } catch (Exception $e) {
+            throw new HttpException($e->getMessage());
+        }
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int $id
+     *
+     * @throws StoreResourceFailedException if the validation failed
+     * @throws NotFoundHttpException if the resource is not found
+     * @throws HttpException for other errors and exceptions
+     *
+     * @return Response
+     */
+    public function destroy($id)
+    {
+        try {
+            $this->service->repository->delete($id);
+
+            return $this->response->noContent();
+
+        } catch (ValidatorException $e) {
+            throw new StoreResourceFailedException('Could not delete, validation failed', $e->getMessageBag());
+        } catch (ModelNotFoundException $e) {
+            throw new NotFoundHttpException('Resource with id '. $id .' does not exist');
+        } catch (QueryException $e) {
+            throw new HttpException($e->getMessage());
+        } catch (Exception $e) {
+            throw new HttpException($e->getMessage());
+        }
+    }
+
+}

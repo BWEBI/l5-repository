@@ -1,0 +1,156 @@
+<?php
+
+$NAMESPACE$
+
+use Illuminate\Http\Request;
+use Dingo\Api\Routing\Helpers;
+use Prettus\Validator\Contracts\ValidatorInterface;
+use Prettus\Validator\Exceptions\ValidatorException;
+use Prettus\Repository\Contracts\ResourceableInterface;
+$SERVICE$
+
+
+class $CONTROLLER$Controller extends Controller implements ResourceableInterface
+{
+    // Uncomment to use the internal API
+    // use Helpers;
+
+    /**
+     * @var $CLASS$Service
+     */
+    protected $service;
+
+    public function __construct($CLASS$Service $service)
+    {
+        $this->service = $service;
+    }
+
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function index()
+    {
+        $this->service->repository->pushCriteria(app('Prettus\Repository\Criteria\RequestCriteria'));
+        $$PLURAL$ = $this->service->repository->all();
+
+        // You can use the internal API instead
+        //$$PLURAL$ = $this->api->raw()->get('$PLURAL$');
+
+        return view('$PLURAL$.index', compact('$PLURAL$'));
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  Request $request
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function store(Request $request)
+    {
+        try {
+
+            $$SINGULAR$ = $this->service->repository->create($request->all());
+
+            // You can use the internal API instead
+            //$$SINGULAR$ = $this->api->raw()->post('$PLURAL$', $request->all());
+
+            $response = [
+                'message' => '$CLASS$ created.',
+                'data'    => $$SINGULAR$,
+            ];
+
+            return redirect()->back()->with('message', $response['message']);
+
+        } catch (ValidatorException $e) {
+            return redirect()->back()->withErrors($e->getMessageBag())->withInput();
+        }
+    }
+
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int $id
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function show($id)
+    {
+        $$SINGULAR$ = $this->service->repository->find($id);
+
+        // You can use the internal API instead
+        //$$SINGULAR$ = $this->api->raw()->get('$PLURAL$/'.$id);
+
+        return view('$PLURAL$.show', compact('$SINGULAR$'));
+    }
+
+
+    /**
+     * Show the form for editing the specified resource.
+     *
+     * @param  int $id
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function edit($id)
+    {
+        $$SINGULAR$ = $this->service->repository->find($id);
+
+        // You can use the internal API instead
+        //$$SINGULAR$ = $this->api->raw()->get('$PLURAL$/'.$id);
+
+        return view('$PLURAL$.edit', compact('$SINGULAR$'));
+    }
+
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  Request $request
+     * @param  string  $id
+     *
+     * @return Response
+     */
+    public function update(Request $request, $id)
+    {
+        try {
+
+            $$SINGULAR$ = $this->service->repository->update($request->all(), $id);
+
+            // You can use the internal API instead
+            //$$SINGULAR$ = $this->api->raw()->put('$PLURAL$/'.$id, $request->all());
+
+            $response = [
+                'message' => '$CLASS$ updated.',
+                'data'    => $$SINGULAR$,
+            ];
+
+            return redirect()->back()->with('message', $response['message']);
+
+        } catch (ValidatorException $e) {
+            return redirect()->back()->withErrors($e->getMessageBag())->withInput();
+        }
+    }
+
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int $id
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        $deleted = $this->service->repository->delete($id);
+
+        // You can use the internal API instead
+        //$$SINGULAR$ = $this->api->raw()->delete('$PLURAL$/'.$id);
+
+        return redirect()->back()->with('message', '$CLASS$ deleted.');
+    }
+}

@@ -23,13 +23,16 @@ class BindingsGenerator extends Generator
 
     public function run()
     {
-
-
         // Add entity repository binding to the repository service provider
         $provider = \File::get($this->getPath());
         $repositoryInterface = '\\' . $this->getRepository() . "::class";
         $repositoryEloquent = '\\' . $this->getEloquentRepository() . "::class";
-        \File::put($this->getPath(), str_replace($this->bindPlaceholder, "\$this->app->bind({$repositoryInterface}, $repositoryEloquent);" . PHP_EOL . '        ' . $this->bindPlaceholder, $provider));
+
+        if (strpos($provider, "\$this->app->bind({$repositoryInterface}, $repositoryEloquent);") === false) {
+            \File::put($this->getPath(), str_replace($this->bindPlaceholder, "\$this->app->bind({$repositoryInterface}, $repositoryEloquent);" . PHP_EOL . '        ' . $this->bindPlaceholder, $provider));
+        } else {
+            return false;
+        }
     }
 
     /**

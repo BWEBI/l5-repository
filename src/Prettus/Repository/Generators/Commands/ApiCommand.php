@@ -2,13 +2,14 @@
 namespace Prettus\Repository\Generators\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Collection;
-use Prettus\Repository\Generators\ControllerGenerator;
+use Prettus\Repository\Generators\ApiBaseControllerGenerator;
+use Prettus\Repository\Generators\ApiControllerGenerator;
 use Prettus\Repository\Generators\FileAlreadyExistsException;
+use Prettus\Repository\Generators\TestGenerator;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
-class ControllerCommand extends Command
+class ApiCommand extends Command
 {
 
     /**
@@ -16,21 +17,21 @@ class ControllerCommand extends Command
      *
      * @var string
      */
-    protected $name = 'make:resource';
+    protected $name = 'make:api';
 
     /**
      * The description of command.
      *
      * @var string
      */
-    protected $description = 'Create a new RESTfull controller.';
+    protected $description = 'Create a new RESTfull API controller.';
 
     /**
      * The type of class being generated.
      *
      * @var string
      */
-    protected $type = 'Controller';
+    protected $type = 'API Controller';
 
 
     /**
@@ -41,21 +42,27 @@ class ControllerCommand extends Command
     public function fire()
     {
         try {
-            // Generate create request for controller
-            $this->call('make:request', [
-                'name' => $this->argument('name') . 'CreateRequest'
-            ]);
-            // Generate update request for controller
-            $this->call('make:request', [
-                'name' => $this->argument('name') . 'UpdateRequest'
+            // Generate a service for the api controller
+            $this->call('make:service', [
+                'name' => $this->argument('name'),
+                '--force' => $this->option('force'),
             ]);
 
-            (new ControllerGenerator([
+            (new ApiControllerGenerator([
                 'name' => $this->argument('name'),
-                'force' => $this->option('force'),
-                'type' => $this->argument('type'),
+                '--force' => $this->option('force'),
             ]))->run();
             $this->info($this->type . ' created successfully.');
+
+            (new ApiBaseControllerGenerator())->run();
+            $this->info('API base controller created successfully.');
+
+            if ($this->confirm('Would you like to create a Test API Class? [y|N]')) {
+                $this->call('make:api-test', [
+                    'name'    => $this->argument('name'),
+                    '--force' => $this->option('force')
+                ]);
+            }
         } catch (FileAlreadyExistsException $e) {
             $this->error($this->type . ' already exists!');
 
@@ -75,13 +82,7 @@ class ControllerCommand extends Command
             [
                 'name',
                 InputArgument::REQUIRED,
-                'The name of model for which the controller is being generated.',
-                null
-            ],
-            [
-                'type',
-                InputArgument::OPTIONAL,
-                'The type of the controller to be generated.',
+                'The name of model for which the api controller is being generated.',
                 null
             ],
         ];

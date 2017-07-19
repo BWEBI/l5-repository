@@ -1,0 +1,34 @@
+<?php
+
+$NAMESPACE$
+
+$REPOSITORY$
+$VALIDATOR$
+$PRESENTER$
+
+class $CLASS$Service
+{
+
+    /**
+     * @var $CLASS$Repository
+     */
+    public $repository;
+
+    /**
+     * @var $CLASS$Validator
+     */
+    public $validator;
+
+    /**
+     * @var $CLASS$Presenter
+     */
+    public $presenter;
+
+    public function __construct($CLASS$Repository $repository, $CLASS$Validator $validator, $CLASS$Presenter $presenter)
+    {
+        $this->repository = $repository;
+        $this->validator  = $validator;
+        $this->presenter  = $presenter;
+    }
+
+}

@@ -2,13 +2,12 @@
 namespace Prettus\Repository\Generators\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Collection;
-use Prettus\Repository\Generators\ControllerGenerator;
+use Prettus\Repository\Generators\ServiceGenerator;
 use Prettus\Repository\Generators\FileAlreadyExistsException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 
-class ControllerCommand extends Command
+class ServiceCommand extends Command
 {
 
     /**
@@ -16,21 +15,21 @@ class ControllerCommand extends Command
      *
      * @var string
      */
-    protected $name = 'make:resource';
+    protected $name = 'make:service';
 
     /**
      * The description of command.
      *
      * @var string
      */
-    protected $description = 'Create a new RESTfull controller.';
+    protected $description = 'Create a new service class.';
 
     /**
      * The type of class being generated.
      *
      * @var string
      */
-    protected $type = 'Controller';
+    protected $type = 'Service';
 
 
     /**
@@ -41,19 +40,9 @@ class ControllerCommand extends Command
     public function fire()
     {
         try {
-            // Generate create request for controller
-            $this->call('make:request', [
-                'name' => $this->argument('name') . 'CreateRequest'
-            ]);
-            // Generate update request for controller
-            $this->call('make:request', [
-                'name' => $this->argument('name') . 'UpdateRequest'
-            ]);
-
-            (new ControllerGenerator([
+            (new ServiceGenerator([
                 'name' => $this->argument('name'),
                 'force' => $this->option('force'),
-                'type' => $this->argument('type'),
             ]))->run();
             $this->info($this->type . ' created successfully.');
         } catch (FileAlreadyExistsException $e) {
@@ -75,13 +64,7 @@ class ControllerCommand extends Command
             [
                 'name',
                 InputArgument::REQUIRED,
-                'The name of model for which the controller is being generated.',
-                null
-            ],
-            [
-                'type',
-                InputArgument::OPTIONAL,
-                'The type of the controller to be generated.',
+                'The name of model for which the service is being generated.',
                 null
             ],
         ];

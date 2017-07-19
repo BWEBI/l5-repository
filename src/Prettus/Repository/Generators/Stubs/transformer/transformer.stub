@@ -2,6 +2,7 @@
 
 $NAMESPACE$
 
+use Carbon\Carbon;
 use League\Fractal\TransformerAbstract;
 use $MODEL$;
 
@@ -25,8 +26,8 @@ class $CLASS$Transformer extends TransformerAbstract
 
             /* place your other model properties here */
 
-            'created_at' => $model->created_at,
-            'updated_at' => $model->updated_at
+            'created_at' => Carbon::parse($model->created_at)->format('Y-m-d H:i:s'),
+            'updated_at' => Carbon::parse($model->updated_at)->format('Y-m-d H:i:s')
         ];
     }
 }

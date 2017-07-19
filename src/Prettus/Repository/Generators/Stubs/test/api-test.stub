@@ -1,0 +1,149 @@
+<?php
+
+namespace Tests\$PATH$;
+
+use Tests\TestCase;
+use $APPNAME$$PATH$\$CLASS$;
+use Faker\Factory as Faker;
+use Dingo\Api\Routing\Helpers;
+use Prettus\Repository\Contracts\TestResourceableInterface;
+use Illuminate\Foundation\Testing\WithoutMiddleware;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
+
+class $CLASS$Test extends TestCase implements TestResourceableInterface
+{
+    use Helpers;
+    use WithoutMiddleware;
+    use DatabaseMigrations;
+
+    protected $faker;
+
+    protected function setUp()
+    {
+        parent::setUp();
+        $this->faker = Faker::create();
+    }
+
+    public function test_index()
+    {
+        $$PLURAL$ = factory($CLASS$::class, 50)->create();
+        $this->isInstanceOf('$CLASS$Repository', $$PLURAL$);
+
+        $response = $this->api->raw()->get('$PLURAL$');
+        $this->assertJson($response->getContent());
+
+        $response_content = collect(json_decode($response->content(), true))->get('data');
+        $this->assertCount(50, $response_content);
+
+        $$PLURAL$_content = $$PLURAL$->toArray();
+
+        foreach($response_content as $key => $value)
+        {
+            foreach ($value as $k => $v)
+            {
+                $this->assertEquals($response_content[$key][$k], $$PLURAL$_content[$key][$k]);
+            }
+        }
+    }
+
+    public function test_create()
+    {
+        $$SINGULAR$ = $FILLABLE$;
+
+        $response = $this->api->raw()->post('$PLURAL$', $$SINGULAR$);
+
+        $this->assertDatabaseHas('$PLURAL$', $$SINGULAR$);
+
+        $this->assertEquals('201', $response->status());
+        $this->assertJson($response->content());
+
+        $response_content = collect(json_decode($response->content(), true))->get('data');
+        $$SINGULAR$_content = collect($$SINGULAR$)->keys()->all();
+
+        foreach($$SINGULAR$_content as $field)
+        {
+            $this->assertEquals($response_content[$field], $$SINGULAR$[$field]);
+        }
+    }
+
+    public function test_show()
+    {
+        $$SINGULAR$ = [
+            'account_id'     => 10,
+            'first_name'     => 'Chen',
+            'last_name'      => 'Alon',
+            'email'          => 'chen@bwebi.co.il',
+            'role_title'     => 'CEO',
+            'mobile_phone'   => '0506704442',
+            'is_owner'       => 1,
+            'password'       => bcrypt('secret'),
+        ];
+        $this->api->raw()->post('$PLURAL$', $$SINGULAR$);
+
+        $response = $this->api->raw()->get('$PLURAL$/1');
+
+        $this->assertEquals('200', $response->status());
+        $this->assertJson($response->content());
+
+        $response_content = collect(json_decode($response->content(), true))->get('data');
+        $$SINGULAR$_content = collect($$SINGULAR$)->keys()->all();
+
+        foreach($$SINGULAR$_content as $field)
+        {
+            $this->assertEquals($response_content[$field], $$SINGULAR$[$field]);
+        }
+    }
+
+    public function test_update()
+    {
+        $$SINGULAR$ = [
+            'account_id'     => 10,
+            'first_name'     => 'Chen',
+            'last_name'      => 'Alon',
+            'email'          => 'chen@bwebi.co.il',
+            'role_title'     => 'CEO',
+            'mobile_phone'   => '0506704442',
+            'is_owner'       => 1,
+            'password'       => bcrypt('secret'),
+        ];
+        $this->api->raw()->post('$PLURAL$', $$SINGULAR$);
+
+        $$SINGULAR$ = [
+            'email'          => 'info@bwebi.co.il',
+            'role_title'     => 'Founder & CEO',
+        ];
+        $response = $this->api->raw()->put('$PLURAL$/1', $$SINGULAR$);
+
+        $this->assertEquals('200', $response->status());
+        $this->assertJson($response->content());
+
+        $response_content = collect(json_decode($response->content(), true))->get('data');
+        $$SINGULAR$_content = collect($$SINGULAR$)->keys()->all();
+
+        foreach($$SINGULAR$_content as $field)
+        {
+            $this->assertEquals($response_content[$field], $$SINGULAR$[$field]);
+        }
+    }
+
+    public function test_delete()
+    {
+        $$SINGULAR$ = [
+            'account_id'     => 10,
+            'first_name'     => 'Chen',
+            'last_name'      => 'Alon',
+            'email'          => 'chen@bwebi.co.il',
+            'role_title'     => 'CEO',
+            'mobile_phone'   => '0506704442',
+            'is_owner'       => 1,
+            'password'       => bcrypt('secret'),
+        ];
+        $this->api->raw()->post('$PLURAL$', $$SINGULAR$);
+
+        $response = $this->api->raw()->delete('$PLURAL$/1');
+
+        $this->assertEquals('204', $response->status());
+        $this->assertNull($response->content());
+        $this->assertDatabaseMissing('$PLURAL$', ['id' => 1]);
+    }
+}

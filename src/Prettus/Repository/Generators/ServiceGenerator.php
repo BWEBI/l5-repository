@@ -2,24 +2,18 @@
 namespace Prettus\Repository\Generators;
 
 /**
- * Class ControllerGenerator
+ * Class ServiceGenerator
  * @package Prettus\Repository\Generators
  */
-class ControllerGenerator extends Generator
+class ServiceGenerator extends Generator
 {
-
-    public function __construct(array $options = [])
-    {
-        parent::__construct($options);
-        $this->setControllerType();
-    }
 
     /**
      * Get stub name.
      *
      * @var string
      */
-    protected $stub = 'controller/service-controller';
+    protected $stub = 'service/service';
 
     /**
      * Get root namespace.
@@ -38,7 +32,7 @@ class ControllerGenerator extends Generator
      */
     public function getPathConfigNode()
     {
-        return 'controllers';
+        return 'services';
     }
 
     /**
@@ -48,7 +42,7 @@ class ControllerGenerator extends Generator
      */
     public function getPath()
     {
-        return $this->getBasePath() . '/' . parent::getConfigGeneratorClassPath($this->getPathConfigNode(), true) . '/' . $this->getControllerName() . 'Controller.php';
+        return $this->getBasePath() . '/' . parent::getConfigGeneratorClassPath($this->getPathConfigNode(), true) . '/' . $this->getServiceName() . 'Service.php';
     }
 
     /**
@@ -62,31 +56,14 @@ class ControllerGenerator extends Generator
     }
 
     /**
-     * Gets controller name based on model
+     * Gets service name based on model
      *
      * @return string
      */
-    public function getControllerName()
+    public function getServiceName()
     {
 
-        return ucfirst($this->getPluralName());
-    }
-
-    /**
-     * Set the controller type
-     *
-     * @return void
-     */
-    public function setControllerType()
-    {
-        switch ($this->type) {
-            case 'Service Controller':
-                $this->stub = 'controller/service-controller';
-                break;
-            case 'Repository Controller':
-                $this->stub = 'controller/controller';
-                break;
-        }
+        return ucfirst($this->getSingularName());
     }
 
     /**
@@ -109,12 +86,11 @@ class ControllerGenerator extends Generator
     {
 
         return array_merge(parent::getReplacements(), [
-            'controller' => $this->getControllerName(),
             'plural'     => $this->getPluralName(),
             'singular'   => $this->getSingularName(),
             'validator'  => $this->getValidator(),
             'repository' => $this->getRepository(),
-            'service'    => $this->getService(),
+            'presenter'  => $this->getPresenter(),
             'appname'    => $this->getAppNamespace(),
         ]);
     }
@@ -169,21 +145,21 @@ class ControllerGenerator extends Generator
     }
 
     /**
-     * Gets service full class name
+     * Gets presenter full class name
      *
      * @return string
      */
-    public function getService()
+    public function getPresenter()
     {
-        $serviceGenerator = new ServiceGenerator([
+        $presenterGenerator = new PresenterGenerator([
             'name' => $this->name,
         ]);
 
-        $service = $serviceGenerator->getRootNamespace() . '\\' . $serviceGenerator->getName();
+        $presenter = $presenterGenerator->getRootNamespace() . '\\' . $presenterGenerator->getName();
 
         return 'use ' . str_replace([
-                "\\",
-                '/'
-            ], '\\', $service) . 'Service;';
+            "\\",
+            '/'
+        ], '\\', $presenter) . 'Presenter;';
     }
 }

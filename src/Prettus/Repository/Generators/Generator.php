@@ -4,6 +4,7 @@ namespace Prettus\Repository\Generators;
 
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Str;
+use Prettus\Repository\Exceptions\ClassExistsException;
 
 abstract class Generator
 {
@@ -228,6 +229,15 @@ abstract class Generator
             case ('criteria' === $class):
                 $path = config('repository.generator.paths.criteria', 'Criteria');
                 break;
+            case ('services' === $class):
+                $path = config('repository.generator.paths.services', 'Services');
+                break;
+            case ('api-controllers' === $class):
+                $path = config('repository.generator.paths.api-controllers', 'Http\Controllers\Api');
+                break;
+            case ('api-base' === $class):
+                $path = config('repository.generator.paths.api-base', 'Http\Controllers\Api');
+                break;
             default:
                 $path = '';
         }
@@ -283,12 +293,16 @@ abstract class Generator
      *
      * @return int
      * @throws FileAlreadyExistsException
+     * @throws ClassExistsException
      */
     public function run()
     {
         $this->setUp();
+        if(class_exists($this->getClass())) {
+            return 0;
+        }
         if ($this->filesystem->exists($path = $this->getPath()) && !$this->force) {
-            throw new FileAlreadyExistsException($path);
+            return 0;
         }
         if (!$this->filesystem->isDirectory($dir = dirname($path))) {
             $this->filesystem->makeDirectory($dir, 0777, true, true);
@@ -366,6 +380,10 @@ abstract class Generator
         if (property_exists($this, $key)) {
             return $this->{$key};
         }
+
+        var_dump($key);
+        if ($key == "fillable")
+            dd($this->option($key));
 
         return $this->option($key);
     }
