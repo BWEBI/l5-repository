@@ -39,6 +39,11 @@ abstract class BaseRepository implements RepositoryInterface, RepositoryCriteria
     protected $app;
 
     /**
+     * @var
+     */
+    protected $model;
+
+    /**
      * @var string
      */
     protected $end_point;
@@ -124,11 +129,27 @@ abstract class BaseRepository implements RepositoryInterface, RepositoryCriteria
     {
         $this->app = $app;
         $this->criteria = new Collection();
+        $this->makeModel();
         $this->makeGraphQL();
         $this->makeBuilder();
         $this->makePresenter();
         $this->makeValidator();
         $this->boot();
+    }
+
+    /**
+     * @return Model
+     * @throws RepositoryException
+     */
+    public function makeModel()
+    {
+        $model = $this->app->make($this->model());
+
+        /*if (!$model instanceof Model) {
+            throw new RepositoryException("Class {$this->model()} must be an instance of Illuminate\\Database\\Eloquent\\Model");
+        }*/
+
+        return $this->model = $model;
     }
 
     /**
@@ -166,13 +187,13 @@ abstract class BaseRepository implements RepositoryInterface, RepositoryCriteria
      */
     public function boot()
     {
+        $this->setType($this->type);
         if ($this->type === null)
             throw new RepositoryException('Type must be defined');
     }
 
     /**
-     * @return GraphQLClient
-     * @throws RepositoryException
+     * @param $type
      */
     public function setType($type)
     {
@@ -414,14 +435,15 @@ abstract class BaseRepository implements RepositoryInterface, RepositoryCriteria
      *
      * @return mixed
      */
-    public function find($id, $columns = ['*'])
+    public function find($id, $columns = [])
     {
-        $this->applyCriteria();
+        //$this->applyCriteria();
         $this->applyScope();
-        $model = $this->model->findOrFail($id, $columns);
-        $this->resetModel();
 
-        return $this->parserResult($model);
+        $this->arguments = ['id' => $id];
+        $results = $this->buildQuery(str_singular($this->type), $columns);
+
+        return $this->parserResult($results);
     }
 
     /**
@@ -433,14 +455,15 @@ abstract class BaseRepository implements RepositoryInterface, RepositoryCriteria
      *
      * @return mixed
      */
-    public function findByField($field, $value = null, $columns = ['*'])
+    public function findByField($field, $value = null, $columns = [])
     {
-        $this->applyCriteria();
+        //$this->applyCriteria();
         $this->applyScope();
-        $model = $this->model->where($field, '=', $value)->get($columns);
-        $this->resetModel();
 
-        return $this->parserResult($model);
+        $this->arguments = ['filter' => [$field => $value]];
+        $results = $this->buildQuery(self::ALL.$this->type, $columns);
+
+        return $this->parserResult($results);
     }
 
     /**
@@ -451,17 +474,15 @@ abstract class BaseRepository implements RepositoryInterface, RepositoryCriteria
      *
      * @return mixed
      */
-    public function findWhere(array $where, $columns = ['*'])
+    public function findWhere(array $where, $columns = [])
     {
-        $this->applyCriteria();
+        //$this->applyCriteria();
         $this->applyScope();
 
-        $this->applyConditions($where);
+        $this->arguments = ['filter' => $where];
+        $results = $this->buildQuery(self::ALL.$this->type, $columns);
 
-        $model = $this->model->get($columns);
-        $this->resetModel();
-
-        return $this->parserResult($model);
+        return $this->parserResult($results);
     }
 
     /**
@@ -512,24 +533,16 @@ abstract class BaseRepository implements RepositoryInterface, RepositoryCriteria
     public function create(array $attributes)
     {
         if (!is_null($this->validator)) {
-            // we should pass data that has been casts by the model
-            // to make sure data type are same because validator may need to use
-            // this data to compare with data that fetch from database.
-            $attributes = $this->model->newInstance()
-                ->forceFill($attributes)
-                ->makeVisible($this->model->getHidden())
-                ->toArray();
-
             $this->validator->with($attributes)->passesOrFail(ValidatorInterface::RULE_CREATE);
         }
 
-        $model = $this->model->newInstance($attributes);
-        $model->save();
-        $this->resetModel();
+        $this->arguments = $attributes;
 
-        event(new RepositoryEntityCreated($this, $model));
+        $result = $this->buildMutation(self::CREATE.$this->type, $this->model->getFields());
 
-        return $this->parserResult($model);
+        //event(new RepositoryEntityCreated($this, $result));
+
+        return $this->parserResult($result);
     }
 
     /**
@@ -547,31 +560,17 @@ abstract class BaseRepository implements RepositoryInterface, RepositoryCriteria
         $this->applyScope();
 
         if (!is_null($this->validator)) {
-            // we should pass data that has been casts by the model
-            // to make sure data type are same because validator may need to use
-            // this data to compare with data that fetch from database.
-            $attributes = $this->model->newInstance()
-                ->forceFill($attributes)
-                ->makeVisible($this->model->getHidden())
-                ->toArray();
-
             $this->validator->with($attributes)->setId($id)->passesOrFail(ValidatorInterface::RULE_UPDATE);
         }
 
-        $temporarySkipPresenter = $this->skipPresenter;
+        $this->arguments = $attributes;
+        $this->arguments['id'] = $id;
 
-        $this->skipPresenter(true);
+        $result = $this->buildMutation(self::UPDATE.str_singular($this->type), $this->model->getFields());
 
-        $model = $this->model->findOrFail($id);
-        $model->fill($attributes);
-        $model->save();
+        //event(new RepositoryEntityUpdated($this, $model));
 
-        $this->skipPresenter($temporarySkipPresenter);
-        $this->resetModel();
-
-        event(new RepositoryEntityUpdated($this, $model));
-
-        return $this->parserResult($model);
+        return $this->parserResult($result);
     }
 
     /**
@@ -1021,6 +1020,7 @@ abstract class BaseRepository implements RepositoryInterface, RepositoryCriteria
      */
     public function buildMutation($name, $body = [])
     {
+        $name = str_singular($name);
         $this->mutation_builder->name($name)->body($body);
 
         if (!is_null($this->arguments)) {
