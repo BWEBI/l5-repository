@@ -10,6 +10,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | GraphQL Repository configuration
+    |--------------------------------------------------------------------------
+    |
+    */
+    'graphql' => [
+        'end_point' => 'https://api.graph.cool/simple/v1/cj51m2ngh98180175w0nfki00',
+        'api_key'   => 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE1MDAzNjI3NDksImNsaWVudElkIjoiY2o1NmkyMmczNTcxbjAxNDhkODBtamZybiIsInByb2plY3RJZCI6ImNqNTFtMm5naDk4MTgwMTc1dzBuZmtpMDAiLCJwZXJtYW5lbnRBdXRoVG9rZW5JZCI6ImNqNTk5OHF3NXJuamcwMTc0eWZkZnMxNXQifQ.uKCppGYY9rqOaZGj-0klpa8cDsbJ1StKHgsWV7E7buA'
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Repository Pagination Limit Default
     |--------------------------------------------------------------------------
     |
